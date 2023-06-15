@@ -1,66 +1,59 @@
 package stellarburgers.pages;
-import io.qameta.allure.Step;
-import io.restassured.response.ValidatableResponse;
+public class User {
+    private String email;
+    private String password;
+    private String name;
+    private String token;
 
-import static com.codeborne.selenide.Selenide.page;
-import static io.restassured.RestAssured.given;
-import static org.apache.http.HttpStatus.SC_OK;
-
-public class User extends AppConfig {
-    LoginPage loginPage = page(LoginPage.class);
-    RegistrationPage registrationPage = page(RegistrationPage.class);
-
-    public String userName;
-    public String userEmail;
-    public String userPassword;
-
-    public User(String userName, String userEmail, String userPassword) {
-        this.userName = userName;
-        this.userEmail = userEmail;
-        this.userPassword = userPassword;
+    public User(String email, String password, String name, String token) {
+        this.email = email;
+        this.password = password;
+        this.name = name;
+        this.token = token;
+    }
+    public User(String email, String password) {
+        this.email = email;
+        this.password = password;
     }
 
-    @Step("Регистрация пользователя")
-    public void RegistrationUser() {
-        Credentials credentials = new Credentials(userName, userEmail, userPassword);
-        registrationPage.setUserNameField(credentials.userName);
-        registrationPage.setUserEmailField(credentials.userEmail);
-        registrationPage.setUserPasswordField(credentials.userPassword);
-        registrationPage.clickToRegisterButton();
+    public User() {
     }
 
-    @Step("Авторизация пользователя")
-    public void LogInUser() {
-        Credentials credentials = new Credentials(userName, userEmail, userPassword);
-        loginPage.setEmailField(credentials.userEmail);
-        loginPage.setPasswordField(credentials.userPassword);
-        loginPage.clickToLoginButton();
-
+    public String getEmail() {
+        return email;
     }
 
-    @Step("Получить токен пользователя с помощью API")
-    public String getUserTokenUsingAPI() {
-        String accessToken = "";
-        ValidatableResponse response = given()
-                .spec(getRequestSpec())
-                .body(this)
-                .when()
-                .post(AUTHORISATION_PATH + "login")
-                .then();
-        if (response.extract().statusCode() == SC_OK) {
-            accessToken = response.extract().path("accessToken");
-        }
-        return accessToken;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    @Step("Удалить пользователя с помощью API")
-    public void deleteUserUsingAPI() {
-        String token = getUserTokenUsingAPI();
-        given()
-                .spec(getRequestSpec())
-                .header("authorization", token)
-                .when()
-                .delete(AUTHORISATION_PATH + "user")
-                .then();
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+    public String getToken() {
+        return token;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    @Override
+    public User clone() {
+        User newUser = new User();
+        newUser.setName(this.name);
+        newUser.setEmail(this.email);
+        newUser.setPassword(this.password);
+        return newUser;
     }
 }

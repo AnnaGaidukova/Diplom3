@@ -1,82 +1,91 @@
 package stellarburgers.pages;
-import com.codeborne.selenide.WebDriverRunner;
+
+import io.github.bonigarcia.wdm.WebDriverManager;
 import io.qameta.allure.junit4.DisplayName;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import stellarburgers.pages.AppConfig;
-import stellarburgers.pages.extentions.WebDriverFactory;
-import stellarburgers.pages.*;
-import stellarburgers.pages.RandomCredentials;
-import stellarburgers.pages.User;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import static stellarburgers.pages.LoginPage.LOGIN_PAGE;
+import static stellarburgers.pages.PasswordRecoveryPage.RECOVERY_PASSWORD_PAGE;
+import static stellarburgers.pages.MainPage.MAIN_PAGE;
+import static stellarburgers.pages.RegistrationPage.REGISTRATION_PAGE;
 
-import static com.codeborne.selenide.Selenide.open;
-import static com.codeborne.selenide.Selenide.page;
 
 public class LoginPageTest {
+    private WebDriver driver;
+    private String userName;
+    private String userEmail;
+    private String userPassword;
+    private User user;
+    private UserStep userStep;
+    private LoginPage loginPage;
+    private MainPage mainPage;
+    private PasswordRecoveryPage passwordRecoveryPage;
+    private RegistrationPage registrationPage;
+    private HeaderPage headerPage;
 
-    HeaderPage header = page(HeaderPage.class);
-    MainPage mainPage = page(MainPage.class);
-    LoginPage loginPage = page(LoginPage.class);
-    RegistrationPage registrationPage = page( RegistrationPage.class);
-    PasswordRecoveryPage passwordRecoveryPage = page(PasswordRecoveryPage.class);
-    User validUserData;
-
-    RandomCredentials random = new RandomCredentials();
-    User user = new User(random.String(), random.Email(), random.String());
 
     @Before
-    public void setUp() {
-        WebDriverFactory.initWebDriver();
-        open(AppConfig.URL_REGISTER);
-        user.RegistrationUser();
+    public void setUp()  {
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--remote-allow-origins=*");
+        WebDriverManager.chromedriver().setup();
+        driver = new ChromeDriver(options);
+        userName = RandomStringUtils.randomAlphabetic(10);
+        userEmail = RandomStringUtils.randomAlphabetic(10) + "@yandex.ru";
+        userPassword = RandomStringUtils.randomAlphabetic(10);
+        userStep = new UserStep();
+        user = new User(userEmail, userPassword, userName, "");
+        userStep.createUser(user);
+        loginPage = new LoginPage(driver);
+        mainPage = new MainPage(driver);
+        registrationPage = new RegistrationPage(driver);
+        passwordRecoveryPage = new PasswordRecoveryPage(driver);
+        headerPage = new HeaderPage(driver);
     }
-
     @After
     public void tearDown() {
-        if (validUserData != null) {
-            validUserData.deleteUserUsingAPI();
-        }
-        WebDriverRunner.clearBrowserCache();
-        WebDriverRunner.closeWebDriver();
+        driver.quit();
+        userStep.deleteUser(user);
     }
-
     @Test
     @DisplayName("Вход по кнопке Войти в аккаунт на главной")
     public void userLogInFromMainPageLogInButton() {
-        open(AppConfig.URL_MAIN);
+        driver.get(MAIN_PAGE);
         mainPage.clickToLoginButton();
-        user.LogInUser();
-        Assert.assertTrue(mainPage.isMakeOrderButtonDisplayed());
+        loginPage.assertCurrentUrl();
     }
-
     @Test
     @DisplayName("Вход через кнопку Личный кабинет")
-    public void userLogInFromHeaderUserAccountButton() {
-        open(AppConfig.URL_MAIN);
-        header.clickToAccountButton();
-        user.LogInUser();
-        Assert.assertTrue(mainPage.isMakeOrderButtonDisplayed());
+    public void userLogInFromLoginPageLogInButton() {
+        driver.get(LOGIN_PAGE);
+        loginPage.setUserLogin(userEmail, userPassword);
+        loginPage.clickToLoginButton();
+        mainPage.isMakeOrderButtonDisplayed();
     }
-
+    @Test
+    @DisplayName("Вход через кнопку в хедере")
+    public void userLogInFromHeaderLogInButton() {
+        driver.get(MAIN_PAGE);
+        headerPage.clickToAccButton();
+        loginPage.assertCurrentUrl();
+    }
     @Test
     @DisplayName("Вход через кнопку в форме регистрации")
     public void userLogInFromRegisterPage() {
-        open(AppConfig.URL_REGISTER);
+        driver.get(REGISTRATION_PAGE);
         registrationPage.clickToLoginLink();
-        user.LogInUser();
-        Assert.assertTrue(mainPage.isMakeOrderButtonDisplayed());
+        loginPage.assertCurrentUrl();
     }
-
     @Test
     @DisplayName("Вход через кнопку в форме восстановления пароля")
-    public void userLogInFromForgotPasswordPage() {
-        open(AppConfig.URL_LOGIN);
-        loginPage.clickToForgotPasswordLink();
+    public void userLogInFromPasswordRecoveryPage() {
+        driver.get(RECOVERY_PASSWORD_PAGE);
         passwordRecoveryPage.clickToLoginLink();
-        user.LogInUser();
-        Assert.assertTrue(mainPage.isMakeOrderButtonDisplayed());
+        loginPage.assertCurrentUrl();
     }
-
 }

@@ -1,20 +1,20 @@
 package stellarburgers.pages;
-import com.codeborne.selenide.SelenideElement;
 import io.qameta.allure.Step;
-import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.How;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 
 public class PasswordRecoveryPage {
-
-    @FindBy(how = How.XPATH, using = "//*[@name='name']")
-    private SelenideElement emailField;
-    @FindBy(how = How.XPATH, using = "//button[contains(text(),'Восстановить')]")
-    private SelenideElement forgotPasswordLink;
-    @FindBy(how = How.XPATH, using = "//*[@href='/login']")
-    private SelenideElement loginLink;
+    private final WebDriver driver;
+    public PasswordRecoveryPage(WebDriver driver){
+        this.driver = driver;
+    }
+    public static final String RECOVERY_PASSWORD_PAGE = "https://stellarburgers.nomoreparties.site/forgot-password";
+    private final By emailField = By.xpath("//*[@name='name']");
+    private final By loginLink = By.xpath("//*[@href='/login']");
 
     @Step("Клик по ссылке Войти")
     public void clickToLoginLink(){
-        loginLink.click();
+        driver.findElement(loginLink).click();
     }
+
 }

@@ -1,66 +1,59 @@
 package stellarburgers.pages;
-import com.codeborne.selenide.Condition;
-import com.codeborne.selenide.SelenideElement;
 import io.qameta.allure.Step;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.How;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
-public class LoginPage {
 
-    @FindBy(how = How.XPATH, using = "//button[contains(text(),'Войти')]")
-    private SelenideElement loginButton;
+public class LoginPage extends AppConfig {
+    public static final String LOGIN_PAGE = "https://stellarburgers.nomoreparties.site/login";
+    private final WebDriver driver;
+    public LoginPage(WebDriver driver){
+        this.driver = driver;
+    }
+    //button 'Войти'
+    private final By loginButton = By.xpath("//button[contains(text(),'Войти')]");
+    //field name
+    private final By emailField = By.xpath("//*[@name='name']");
+    //field Пароль
+    private final By passwordField = By.xpath("//*[@name='Пароль']");
+    //link register
+    private final By registerPageLink = By.xpath("//*[@href='/register']");
 
-    @FindBy(how = How.XPATH, using = "//*[@name='name']")
-    private SelenideElement emailField;
+    //title 'Вход'
+    private final By logInHeader = By.xpath("//h2[text()='Вход']");
 
-    @FindBy(how = How.XPATH, using = "//*[@name='Пароль']")
-    private SelenideElement passwordField;
-
-    @FindBy(how = How.XPATH, using = "//*[@href='/register']")
-    private SelenideElement registerPageLink;
-
-    @FindBy(how = How.XPATH, using = "//a[contains(text(),'Восстановить пароль')]")
-    private SelenideElement forgotPasswordLink;
-
-    @FindBy(how = How.XPATH, using = "//h2[text()='Вход']")
-    private SelenideElement logInHeader;
 
     @Step("Клик по кнопке Войти на странице авторизации")
     public void clickToLoginButton() {
-        loginButton.click();
+        driver.findElement(loginButton).click();
     }
 
     @Step("Клик по ссылке Зарегистрироваться на странице авторизации")
     public void clickToRegisterPageLink() {
-        registerPageLink.shouldBe(Condition.visible).click();
-    }
-
-    @Step("Клик по ссылке Восстановить пароль")
-    public void clickToForgotPasswordLink() {
-        forgotPasswordLink.click();
-    }
-
-    @Step("Установить значение поля")
-    public void setFieldValueFromScratch(SelenideElement field, String value) {
-        field.sendKeys(Keys.CONTROL + "A");
-        field.sendKeys(Keys.DELETE);
-        field.sendKeys(value);
+        driver.findElement(registerPageLink).click();
     }
 
     @Step("Ввести почту пользователя в поле Email")
     public void setEmailField(String email) {
-        setFieldValueFromScratch(emailField, email);
-
+        driver.findElement(emailField).sendKeys(email);
     }
 
     @Step("Ввести пароль пользователя в поле Пароль")
     public void setPasswordField(String password) {
-        setFieldValueFromScratch(passwordField, password);
+        driver.findElement(passwordField).sendKeys(password);
     }
-
+    @Step("Заполнить форму зарегистрированного пользователя")
+    public void setUserLogin(String email, String password) {
+        setEmailField(email);
+        setPasswordField(password);
+    }
     @Step("Заголовок Регистрация отображается на странице")
     public boolean isLogInHeaderDisplayed() {
-        return logInHeader.shouldBe(Condition.visible).isDisplayed();
+        return driver.findElement(logInHeader).isDisplayed();
+    }
+    public void assertCurrentUrl() {
+        assertThat("Происходит переход на страницу Логина", LOGIN_PAGE, equalTo(driver.getCurrentUrl()));
     }
 }

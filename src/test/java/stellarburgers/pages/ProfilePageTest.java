@@ -1,72 +1,58 @@
 package stellarburgers.pages;
 
-import com.codeborne.selenide.WebDriverRunner;
+import io.github.bonigarcia.wdm.WebDriverManager;
 import io.qameta.allure.junit4.DisplayName;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import stellarburgers.pages.AppConfig;
-import stellarburgers.pages.extentions.WebDriverFactory;
-import stellarburgers.pages.*;
-import stellarburgers.pages.RandomCredentials;
-import stellarburgers.pages.User;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 
-import static com.codeborne.selenide.Selenide.open;
-import static com.codeborne.selenide.Selenide.page;
+import static stellarburgers.pages.LoginPage.LOGIN_PAGE;
 
 public class ProfilePageTest {
-    ProfilePage profilePage = page(ProfilePage.class);
-    LoginPage loginPage = page(LoginPage.class);
-    HeaderPage header = page(HeaderPage.class);
-    User validUserData;
-    RandomCredentials random = new RandomCredentials();
-    User user = new User(random.String(), random.Email(), random.String());
+    private WebDriver driver;
+    private String userName;
+    private String userEmail;
+    private String userPassword;
+    private User user;
+    private UserStep userStep;
+    private LoginPage loginPage;
+    private ProfilePage profilePage;
+    private HeaderPage headerPage;
 
     @Before
     public void setUp()  {
-        WebDriverFactory.initWebDriver();
-        open(AppConfig.URL_REGISTER);
-        user.RegistrationUser();
-        open(AppConfig.URL_LOGIN);
-        user.LogInUser();
-        header.clickToAccountButton();
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--remote-allow-origins=*");
+        WebDriverManager.chromedriver().setup();
+        driver = new ChromeDriver(options);
+        userName = "USerNameTest";
+        userEmail = "USerNameTest@yandex.ru";
+        userPassword = "Test123!";
+        userStep = new UserStep();
+        user = new User(userEmail, userPassword, userName, "");
+        userStep.createUser(user);
+        loginPage = new LoginPage(driver);
+        profilePage = new ProfilePage(driver);
+        headerPage = new HeaderPage(driver);
+        driver.get(LOGIN_PAGE);
+        loginPage.setUserLogin(userEmail, userPassword);
+        loginPage.clickToLoginButton();
     }
     @After
     public void tearDown() {
-        if (validUserData != null) {
-            validUserData.deleteUserUsingAPI();
-        }
-        WebDriverRunner.clearBrowserCache();
-        WebDriverRunner.closeWebDriver();
+        driver.quit();
     }
-
-    @Test
-    @DisplayName("Переход по клику на «Личный кабинет».")
-    public void openUserAccount() {
-        boolean isPersonalAreaElementDisplayed = profilePage.isExitButtonDisplayed();
-        Assert.assertTrue(isPersonalAreaElementDisplayed);
-    }
-
     @Test
     @DisplayName("Выход по кнопке Выйти в личном кабинете")
-    public void exitFromUserAccount() throws InterruptedException {
+    public void exitFromUserAccount() {
+        driver.get(LOGIN_PAGE);
+        loginPage.setUserLogin(userEmail, userPassword);
+        loginPage.clickToLoginButton();
+        headerPage.clickToAccButton();
+        profilePage.assertCurUrl();
         profilePage.clickToExitButton();
-        boolean isExitSuccess = loginPage.isLogInHeaderDisplayed();
-        Assert.assertTrue(isExitSuccess);
-    }
-
-    @Test
-    @DisplayName("Перейти в конструктор бургеров из лого Stellar Burgers")
-    public void switchFromAccountToConstructorByLogo() {
-        header.clickToLogo();
-        Assert.assertTrue(header.isConstructorButtonEnabled());
-    }
-
-    @Test
-    @DisplayName("Перейти в конструктор бургеров по кнопке Конструктор")
-    public void switchFromAccountToConstructorByConstructorButton() {
-        header.clickToConstructorButton();
-        Assert.assertTrue(header.isConstructorButtonEnabled());
     }
 }

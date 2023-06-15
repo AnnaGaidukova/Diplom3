@@ -1,8 +1,7 @@
 package stellarburgers.pages.extentions;
-import com.codeborne.selenide.Configuration;
+
 import org.openqa.selenium.WebDriver;
-//import org.openqa.selenium.chrome.ChromeDriver;
-//import org.openqa.selenium.chrome.ChromeOptions;
+
 
 public class WebDriverFactory {
     private static final String YANDEX_BROWSER_PATH = "C:\\Users\\krist\\AppData\\Local\\Yandex\\YandexBrowser\\Application\\browser.exe";
@@ -15,6 +14,6 @@ public class WebDriverFactory {
     }
     private static void createYandexDriver() {
         System.setProperty("webdriver.chrome.driver",  "src/main/resources/chromedriver.exe");
-        Configuration.browserBinary = YANDEX_BROWSER_PATH;
+        //Configuration.browserBinary = YANDEX_BROWSER_PATH;
     }
 }
