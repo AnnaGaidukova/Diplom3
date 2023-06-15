@@ -17,11 +17,8 @@ public class RegistrationPageTest {
     private String userName;
     private String userEmail;
     private String userPassword;
-    private User user;
-    private UserStep userStep;
     private RegistrationPage registrationPage;
     private LoginPage loginPage;
-    private MainPage mainPage;
     private HeaderPage headerPage;
 
     @Before
@@ -33,11 +30,8 @@ public class RegistrationPageTest {
         userName = RandomStringUtils.randomAlphabetic(10);
         userEmail = RandomStringUtils.randomAlphabetic(10) + "@yandex.ru";
         userPassword = "Test123!";
-        userStep = new UserStep();
-        user = new User(userEmail, userPassword, userName, "");
         registrationPage = new RegistrationPage(driver);
         loginPage = new LoginPage(driver);
-        mainPage = new MainPage(driver);
         headerPage = new HeaderPage(driver);
     }
 
